@@ -37,9 +37,57 @@ fn day2(lines: std::io::Lines<io::BufReader<File>>) {
 }
 
 
+fn day2_part2(lines: std::io::Lines<io::BufReader<File>>) {
+
+    let column2 = HashMap::from([
+        ("X", 0),
+        ("Y", 3),
+        ("Z", 6),
+    ]);
+
+    let victories = HashMap::from([
+        ("A", 2),
+        ("B", 3),
+        ("C", 1),
+    ]);
+    let losses = HashMap::from([
+        ("A", 3),
+        ("B", 1),
+        ("C", 2),
+    ]);
+    let draws = HashMap::from([
+        ("A", 1),
+        ("B", 2),
+        ("C", 3),
+    ]);
+
+    let mut result: i32 = 0;
+
+    for line in lines {
+        if let Ok(ip) = line {
+            let len = ip.len();
+            let last = &ip[len-1..];
+            let first = &ip[0..1];
+            let score_last = column2.get(last).unwrap();
+
+            if last.eq("Z") {
+                result += victories.get(first).unwrap() + score_last;
+            }
+            if last.eq("Y") {
+                result += draws.get(first).unwrap() + score_last;
+            }
+            if last.eq("X") {
+                result += losses.get(first).unwrap() + score_last;
+            }
+        }
+    }
+    println!("Result: {}", result);
+}
+
+
 fn main() {
     if let Ok(lines) = read_lines("./inputs/day2.txt") {
-        day2(lines);
+        day2_part2(lines);
     }
 }
 
