@@ -10,7 +10,7 @@ fn parse_stacks(vec: &mut Vec<String>) -> Vec<Vec<String>> {
                 .collect();
     println!("columns: {}", columns.len());
     let mut result = Vec::<Vec<String>>::new();
-    for i in 0..columns.len() {
+    for _ in 0..columns.len() {
         result.push(Vec::<String>::new());
     }
     for v in vec.into_iter().rev() {
@@ -36,7 +36,6 @@ fn parse_instructions(s: &str) -> Vec<i32> {
 
 
 fn day5(lines: std::io::Lines<io::BufReader<File>>) {
-    let mut result: i32 = 0;
     let mut strings = Vec::<String>::new();
     let mut stacks = Vec::<Vec<String>>::new();
     let mut to_collect: bool = true;
@@ -50,10 +49,16 @@ fn day5(lines: std::io::Lines<io::BufReader<File>>) {
                 stacks = parse_stacks(&mut strings);
             } else if !to_collect {
                 let ins = parse_instructions(&ip);
-                for i in 0..ins[0] {
-                    let v = stacks[(ins[1] - 1) as usize].pop().unwrap();
-                    stacks[(ins[2] - 1) as usize].push(v);
-                }
+                let from = stacks[(ins[1] - 1) as usize].clone();
+                stacks[(ins[2] - 1) as usize].extend_from_slice(&from[from.len()-ins[0] as usize..]);
+                stacks[(ins[1] - 1) as usize].drain(from.len()-ins[0] as usize..);
+
+                // Part 1
+
+                // for i in 0..ins[0] {
+                //     let v = stacks[(ins[1] - 1) as usize].pop().unwrap();
+                //     stacks[(ins[2] - 1) as usize].push(v);
+                // }
             }
         }
     }
@@ -64,11 +69,6 @@ fn day5(lines: std::io::Lines<io::BufReader<File>>) {
     println!("{}", stacks.into_iter().map(|v| v[v.len() - 1].clone()).collect::<String>());
     
 }
-
-
-fn day5_part2(lines: std::io::Lines<io::BufReader<File>>) {
-}
-
 
 fn main() {
     if let Ok(lines) = read_lines("./inputs/day5.txt") {
