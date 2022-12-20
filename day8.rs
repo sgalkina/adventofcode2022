@@ -39,6 +39,45 @@ fn iteration_order(size: usize) -> Vec<Vec<(usize, usize)>> {
 }
 
 
+fn len_sorted(w: &Vec<i32>) -> i32 {
+    let mut res: i32 = 0;
+    let size = w.len();
+    if size <= 1 {
+        return res;
+    }
+    let mut prev: i32 = w[0];
+    for i in 1..size {
+        if (w[i] < w[0]) {
+            res += 1;
+            prev = w[i];
+        } else {
+            res += 1;
+            break;
+        }
+    }
+    res
+}
+
+
+fn fill_scentic_score(ar: & Vec<Vec<i32>>, score: &mut Vec<Vec<i32>>) {
+    let mut k: usize = 0;
+    let mut left: i32 = 0;
+    let mut right: i32 = 0;
+    let mut up: i32 = 0;
+    let mut down: i32 = 0;
+    let size: usize = ar.len();
+    for i in 0..size {
+        for j in 0..size {
+            right = len_sorted(&ar[i][j..size].to_vec());
+            down = len_sorted(&ar[i..size].iter().map(|v| v[j]).collect::<Vec<i32>>());
+            left = len_sorted(&ar[i][0..j+1].iter().copied().rev().collect());
+            up = len_sorted(&ar[0..i+1].iter().map(|v| v[j]).rev().collect::<Vec<i32>>());
+            score[i][j] = left*down*right*up;
+        }
+    }
+}
+
+
 fn day8(lines: std::io::Lines<io::BufReader<File>>) {
     let mut matrix: Vec<Vec<i32>> = Vec::new();
     for line in lines {
@@ -54,6 +93,9 @@ fn day8(lines: std::io::Lines<io::BufReader<File>>) {
         fill_visibility(&matrix, & mut vis, &v);
     }
     println!("{:?}", vis.iter().map(|x| -> i32 { x.iter().sum() }).sum::<i32>());
+    let mut score: Vec<Vec<i32>> = vec![vec![0; size]; size];
+    fill_scentic_score(&matrix, & mut score);
+    println!("{:?}", score.iter().map(|x| -> i32 { *x.iter().max().unwrap() }).max().unwrap());
 }
 
 fn main() {
