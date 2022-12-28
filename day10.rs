@@ -47,11 +47,9 @@ fn day10(lines: std::io::Lines<io::BufReader<File>>) {
     for i in 0..240 {
         let k = (i as i32) % 40;
         if i == 0 {
-            if (k == values[i]) | ((k + 1) == values[i]) {
-                crt[i] = true;
-            }
-        } else if (k-1..k+2).contains(&values[i]) {
-            crt[i] = true;
+            crt[i] = (k == values[i]) | ((k + 1) == values[i]);
+        } else {
+            crt[i] = (k-1..k+2).contains(&values[i]);
         }
     }
     draw_crt(&crt);
