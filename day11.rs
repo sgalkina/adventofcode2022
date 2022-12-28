@@ -7,9 +7,9 @@ use std::collections::VecDeque;
 
 #[derive(Debug, Clone)]
 struct Monkey {
-    items: VecDeque<i32>,
+    items: VecDeque<i128>,
     operation: Option<String>,
-    test: Option<i32>,
+    test: Option<i128>,
     pass_true: Option<usize>,
     pass_false: Option<usize>,
     counter: usize,
@@ -34,8 +34,31 @@ fn parse_line(instr: &String, monkey: &mut Option<Monkey>) {
     }
 }
 
+// borrowed from https://github.com/jswalden/adventofcode2022/blob/main/day-11/src/main.rs
+fn gcd(first: i128, second: i128) -> i128 {
+    let (mut max, mut min) = (first, second);
+    if min < max {
+        (min, max) = (max, min);
+    }
 
-fn operation(ops: &String, old: i32) -> i32 {
+    loop {
+        let res = max % min;
+        if res == 0 {
+            return min;
+        }
+
+        (max, min) = (min, res);
+    }
+}
+
+
+fn lcm(first: i128, second: i128) -> i128 {
+    first * second / gcd(first, second)
+}
+// borrowed from https://github.com/jswalden/adventofcode2022/blob/main/day-11/src/main.rs
+
+
+fn operation(ops: &String, old: i128) -> i128 {
     let vals: Vec<&str> = ops.split_whitespace().collect();
     let first = match vals[0] {
         "old" => old,
@@ -55,13 +78,13 @@ fn operation(ops: &String, old: i32) -> i32 {
 }
 
 
-fn turn(monkeys: &mut Vec<Monkey>, monkey_id: usize) {
+fn turn(monkeys: &mut Vec<Monkey>, monkey_id: usize, lcmn: i128) {
     println!("In {:?} making {}", monkeys, monkey_id);
     while !monkeys[monkey_id].items.is_empty() {
         let worry_old = monkeys[monkey_id].items.pop_front().unwrap();
         monkeys[monkey_id].counter += 1;
         println!("Monkey {} inspects an item with a worry level of  {}", monkey_id, worry_old);
-        let worry_new = operation(monkeys[monkey_id].operation.as_ref().unwrap(), worry_old) / 3;
+        let worry_new = operation(monkeys[monkey_id].operation.as_ref().unwrap(), worry_old) % lcmn;
         if worry_new % monkeys[monkey_id].test.unwrap() == 0 {
             let true_val = monkeys[monkey_id].pass_true.unwrap();
             monkeys[true_val].items.push_back(worry_new);
@@ -106,15 +129,21 @@ fn day11(lines: std::io::Lines<io::BufReader<File>>) {
     );
     let size = monkeys.len();
     println!("{:?}", monkeys);
-    for _ in 0..20 {
+    let mut lcmn = monkeys[0].test.unwrap();
+    for i in 1..size {
+        lcmn = lcm(lcmn, monkeys[i].test.unwrap());
+    }
+    println!("lcm {}", lcmn);
+    for _ in 0..10000 {
         for k in 0..size {
-            turn(&mut monkeys, k);
+            println!("Iteration {}", k);
+            turn(&mut monkeys, k, lcmn);
         }
-        println!("{:?}", monkeys);
     }
     let mut counts: Vec<usize> = (0..size).map(|k| monkeys[k].counter).collect();
     counts.sort();
     counts.reverse();
+    println!("{:?}", counts);
     println!("{:?}", counts[0] * counts[1]);
 }
 
