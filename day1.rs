@@ -8,7 +8,7 @@ fn main() {
     if let Ok(lines) = read_lines("./inputs/day1.txt") {
         for line in lines {
             if let Ok(ip) = line {
-                if "".eq(&ip) {
+                if ip.is_empty() {
                     elves.push(current_elf);
                     current_elf = 0;
                 } else {
